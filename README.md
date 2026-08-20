@@ -1,4 +1,4 @@
-# ⚡ Java Collections & Streams Mastery Engine
+# ⚡ Java Collections Explorer
 
 An all-in-one interactive platform and CLI engine to master Java Collections (`ArrayList`, `LinkedList`, `HashSet`, `TreeSet`, `HashMap`) and `Java Streams` with deep JVM architecture, live sandboxes, 20 production scenarios per topic, 20 interview Q&As, and mastery quizzes.
 
