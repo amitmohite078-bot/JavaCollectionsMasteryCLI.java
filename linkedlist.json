@@ -1,0 +1,522 @@
+﻿{
+    "id":  2,
+    "title":  "LinkedList",
+    "mindMap":  "[LinkedList Mind Map]\nIterable -\u003e Collection -\u003e List / Deque / Queue -\u003e LinkedList\n  |-- Backing Storage : Doubly-Linked Node\u003cE\u003e (item, next, prev)\n  |-- Endpoints       : Direct first and last references\n  |-- Performance     : Endpoints: O(1) | Mid Traversals: O(n)\n  +-- Overheads       : 24-32 bytes per node + GC allocation pressure\n",
+    "architecture":  {
+                         "definition":  "A doubly-linked node-based sequence implementing List, Deque, and Queue interfaces.",
+                         "coreArchitecture":  "Maintains distinct Node\u003cE\u003e instances on heap containing item, next, and prev references. Retains first and last endpoint pointers.",
+                         "basicSyntax":  "Deque\u003cString\u003e deque = new LinkedList\u003c\u003e();\ndeque.addFirst(\"Head\");\ndeque.addLast(\"Tail\");",
+                         "keyPoints":  [
+                                           "Implements Deque, acting as a FIFO Queue, LIFO Stack, or Double-Ended Queue.",
+                                           "No fixed capacity or contiguous memory allocation required upfront.",
+                                           "Elements can be inserted and deleted at extremities in O(1) time.",
+                                           "Traversing requires pointer dereferencing across non-contiguous heap allocations."
+                                       ],
+                         "advantages":  [
+                                            "Guaranteed O(1) constant time insertion and deletion at head and tail.",
+                                            "Dynamic scaling without memory-resizing spikes or unused pre-allocated capacity.",
+                                            "Direct reference unlinking runs in true O(1) time."
+                                        ],
+                         "disadvantages":  [
+                                               "High memory overhead (24-32 bytes per node on 64-bit JVMs).",
+                                               "Poor CPU cache locality due to scattered pointer addresses.",
+                                               "O(n) random indexed access (requires traversing up to n/2 nodes)."
+                                           ]
+                     },
+    "operations":  [
+                       {
+                           "name":  "Insertion",
+                           "timeComplexity":  "O(1) at endpoints; O(n) at arbitrary index",
+                           "spaceComplexity":  "O(1)",
+                           "syntax":  "list.addFirst(\"Start\");\nlist.add(5, \"Mid\");",
+                           "internalWorking":  "linkFirst and linkLast instantiate Node\u003c\u003e(prev, e, next) and rewire adjacent endpoint pointers. Positional add traverses n/2 nodes before calling linkBefore().",
+                           "mechanics":  [
+                                             "linkFirst(e): Node\u003cE\u003e f = first; first = new Node\u003c\u003e(null, e, f)",
+                                             "Zero element shifts or array copies",
+                                             "Creates new Node wrapper allocation"
+                                         ]
+                       },
+                       {
+                           "name":  "Deletion",
+                           "timeComplexity":  "O(1) at endpoints; O(n) by value or index",
+                           "spaceComplexity":  "O(1)",
+                           "syntax":  "list.removeFirst();\nlist.remove(\"Target\");",
+                           "internalWorking":  "unlinkFirst and unlinkLast rewire head/tail pointers and null out references. Positional or value removal traverses to target node and splices prev.next = next and next.prev = prev.",
+                           "mechanics":  [
+                                             "unlink(x): x.prev.next = x.next; x.next.prev = x.prev",
+                                             "Nullifies internal item/pointers to assist GC",
+                                             "Decrements size and increments modCount"
+                                         ]
+                       },
+                       {
+                           "name":  "Searching",
+                           "timeComplexity":  "O(1) for endpoints; O(n) for get(index)",
+                           "spaceComplexity":  "O(1)",
+                           "syntax":  "String head = list.getFirst();\nString mid = list.get(5);",
+                           "internalWorking":  "get(index) calls node(index), which traverses from first if index \u003c (size \u003e\u003e 1), otherwise backward from last. contains() traverses sequentially comparing equals().",
+                           "mechanics":  [
+                                             "Bidirectional traversal starting from closest endpoint",
+                                             "Pointer chasing causes CPU cache misses",
+                                             "No direct memory offset indexing"
+                                         ]
+                       },
+                       {
+                           "name":  "Sorting",
+                           "timeComplexity":  "O(n log n)",
+                           "spaceComplexity":  "O(n) aux",
+                           "syntax":  "list.sort(Comparator.naturalOrder());",
+                           "internalWorking":  "LinkedList does not sort in-place across pointers. It dumps nodes to an Object[] array, sorts via Arrays.sort (Timsort), and writes sorted items back into node payloads.",
+                           "mechanics":  [
+                                             "Converts list to array via toArray()",
+                                             "Sorts array via Timsort",
+                                             "Rewrites values back using ListIterator"
+                                         ]
+                       }
+                   ],
+    "scenarios":  [
+                      {
+                          "domain":  "E-Commerce Catalog Display",
+                          "problem":  "Efficient paginated item indexing and display across heavy user traffic.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for e-commerce catalog display."
+                      },
+                      {
+                          "domain":  "High-Speed Memory Caching",
+                          "problem":  "Minimizing cache lookup overhead for read-intensive microservices.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for high-speed memory caching."
+                      },
+                      {
+                          "domain":  "Financial Audit Logging",
+                          "problem":  "High-frequency in-memory buffering before flushing records to cold storage.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for financial audit logging."
+                      },
+                      {
+                          "domain":  "Real-Time Ingest Pipeline",
+                          "problem":  "De-duplicating incoming telemetry packets under sub-millisecond SLAs.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for real-time ingest pipeline."
+                      },
+                      {
+                          "domain":  "API Rate Limiter Tokens",
+                          "problem":  "Sliding window token tracking to enforce client rate throttling limits.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for api rate limiter tokens."
+                      },
+                      {
+                          "domain":  "Graph Traversal Visited Set",
+                          "problem":  "Preventing cyclical loop traversals in large distributed graphs.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for graph traversal visited set."
+                      },
+                      {
+                          "domain":  "Stock Order Book Execution",
+                          "problem":  "Continuous sorting of bids and asks for instantaneous limit order matching.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for stock order book execution."
+                      },
+                      {
+                          "domain":  "Leaderboard Rank Engine",
+                          "problem":  "Tracking live top-tier player rankings and range query slicing.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for leaderboard rank engine."
+                      },
+                      {
+                          "domain":  "Microservice Session Store",
+                          "problem":  "Fast token-to-user session identity lookup per incoming HTTP request.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for microservice session store."
+                      },
+                      {
+                          "domain":  "Distributed Shard Registry",
+                          "problem":  "Resolving database partition shard mappings with O(1) hash routing.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for distributed shard registry."
+                      },
+                      {
+                          "domain":  "Compiler Symbol Table",
+                          "problem":  "Variable and function identifier resolution during abstract syntax tree parsing.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for compiler symbol table."
+                      },
+                      {
+                          "domain":  "Asynchronous Task Queue",
+                          "problem":  "FIFO scheduling and draining of asynchronous jobs across background workers.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for asynchronous task queue."
+                      },
+                      {
+                          "domain":  "Undo/Redo Command Stack",
+                          "problem":  "Reversible state transition stack maintenance with endpoint manipulation.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for undo/redo command stack."
+                      },
+                      {
+                          "domain":  "Fraud Detection Pipeline",
+                          "problem":  "Multi-stage rule filtering and short-circuit evaluation on high-value transfers.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for fraud detection pipeline."
+                      },
+                      {
+                          "domain":  "Log Aggregation Metrics",
+                          "problem":  "Declarative partitioning and group-by aggregations on distributed server logs.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for log aggregation metrics."
+                      },
+                      {
+                          "domain":  "Multi-Core Data Processing",
+                          "problem":  "Parallel partitioning of multi-gigabyte data feeds across available CPU cores.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for multi-core data processing."
+                      },
+                      {
+                          "domain":  "Mobile GPS Breadcrumbs",
+                          "problem":  "Sequential append and tracking of geocoordinates during active user trips.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for mobile gps breadcrumbs."
+                      },
+                      {
+                          "domain":  "IoT Device Telemetry Pool",
+                          "problem":  "Associative device-id to firmware metrics state synchronization.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for iot device telemetry pool."
+                      },
+                      {
+                          "domain":  "Database Connection Pool",
+                          "problem":  "Fixed-size resource acquisition and release tracking for high-throughput I/O.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for database connection pool."
+                      },
+                      {
+                          "domain":  "Batch Settlement Reconciler",
+                          "problem":  "Fast collection diffing and element intersection for end-of-day bank balances.",
+                          "solution":  "Architectural Choice: LinkedList provides optimal space/time efficiency and predictable memory performance for batch settlement reconciler."
+                      }
+                  ],
+    "interviewQAs":  [
+                         {
+                             "category":  "Service-Based",
+                             "question":  "What is the core purpose and interface hierarchy of LinkedList?",
+                             "answer":  "LinkedList belongs to the java.util framework and provides standardized data management contracts."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "Is LinkedList thread-safe by default?",
+                             "answer":  "No, LinkedList is unsynchronized for maximum single-threaded throughput. Use synchronized wrappers or concurrent alternatives if needed."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "What causes ConcurrentModificationException in LinkedList?",
+                             "answer":  "Triggered when an uncoordinated structural mutation occurs while iterating, violating the fail-fast iterator contract."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "What is the time complexity of basic read/write operations in LinkedList?",
+                             "answer":  "Standard operations range from O(1) to O(log n) depending on whether it relies on arrays, hash tables, trees, or pipelines."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "How does LinkedList handle null elements?",
+                             "answer":  "Null handling depends on whether hashing or comparisons are required. Collections using compareTo() reject nulls; hash/array collections permit them."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "How do you synchronize LinkedList for multi-threaded environments?",
+                             "answer":  "Wrap it with Collections.synchronizedCollection() or utilize specialized java.util.concurrent concurrent data structures."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "What is the difference between Fail-Fast and Fail-Safe iterators in LinkedList?",
+                             "answer":  "Fail-fast iterators throw ConcurrentModificationException on structural changes; fail-safe iterators operate on cloned snapshots."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "How do you convert LinkedList to an Array or vice versa?",
+                             "answer":  "Use toArray() to convert to an array, and Arrays.asList() or List.of() to initialize from an array."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "What is the default memory and initial capacity behavior of LinkedList?",
+                             "answer":  "Default initial capacity typically ranges between 10 to 16 with standard expansion load factors (e.g., 0.75 or 1.5x growth)."
+                         },
+                         {
+                             "category":  "Service-Based",
+                             "question":  "When should an engineer avoid using LinkedList?",
+                             "answer":  "Avoid when memory constraints, strict access patterns (e.g. pure LIFO/FIFO), or multi-threaded contention make specialized structures superior."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "Explain the deep internal architecture and data backing of LinkedList.",
+                             "answer":  "LinkedList manages memory layout directly via arrays, linked node references, red-black binary search trees, or lazy Spliterator pipelines."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "How does LinkedList interact with CPU cache lines and spatial memory locality?",
+                             "answer":  "Contiguous array-backed collections provide superior cache-line prefetching, whereas pointer-linked node structures suffer frequent L1/L2 cache misses."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "Explain the amortized time complexity analysis for resizing in LinkedList.",
+                             "answer":  "Exponential capacity expansion (e.g., 1.5x or 2x) ensures total resizing copy cost over N additions is bounded by O(N), yielding O(1) amortized cost."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "How does LinkedList maintain structural invariants under high mutation workloads?",
+                             "answer":  "Invariants (such as Red-Black balancing, treeify thresholds, or modCount updates) are validated and restored synchronously during modification passes."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "What are the garbage collection implications of using LinkedList at large scale?",
+                             "answer":  "Creating millions of wrapper nodes stresses JVM generational GC collectors; prefer array-backed or primitive collections to minimize GC pressure."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "How does LinkedList resolve pathological hash collision or worst-case scenarios?",
+                             "answer":  "Modern OpenJDK implementations transform degraded O(N) linked list bins into balanced Red-Black trees (O(log N)) when collision thresholds are reached."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "Explain the contract between hashCode(), equals(), and compareTo() within LinkedList.",
+                             "answer":  "Hash structures enforce hashCode() equality for equal objects; tree structures rely exclusively on compare() == 0, bypassing equals()."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "What concurrency pitfalls exist when reading and writing LinkedList across threads?",
+                             "answer":  "Race conditions can cause lost updates, stale volatile reads, infinite pointer loops (pre-Java 8), or corrupted internal state."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "How does LinkedList leverage Java 8+ features (Spliterators, Lambdas, Streams)?",
+                             "answer":  "Exposes custom Spliterators supporting parallel recursive decomposition (trySplit) and internal vectorization optimizations."
+                         },
+                         {
+                             "category":  "Product-Based",
+                             "question":  "How would you design a custom, low-latency, memory-efficient alternative to LinkedList?",
+                             "answer":  "Utilize flat primitive arrays, off-heap memory (Unsafe/Foreign Memory API), zero-allocation ring buffers, and cache-aligned structs."
+                         }
+                     ],
+    "quizzes":  [
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q1] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q2] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q3] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q4] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q5] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q6] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Easy",
+                        "question":  "[LinkedList Easy Q7] Which package contains the core definition of LinkedList?",
+                        "options":  [
+                                        "A) java.lang",
+                                        "B) java.util",
+                                        "C) java.io",
+                                        "D) java.net"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList is part of the standard Java Collections Framework located in java.util."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q1] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q2] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q3] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q4] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q5] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q6] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Medium",
+                        "question":  "[LinkedList Medium Q7] What is the typical search time complexity for elements in LinkedList?",
+                        "options":  [
+                                        "A) O(1) or O(log n)",
+                                        "B) O(n^2)",
+                                        "C) O(n!)",
+                                        "D) O(2^n)"
+                                    ],
+                        "correctOption":  "A",
+                        "explanation":  "LinkedList delivers optimized search complexities ranging from O(1) in hash/index structures to O(log n) in balanced search trees."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q1] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q2] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q3] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q4] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q5] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    },
+                    {
+                        "difficulty":  "Hard",
+                        "question":  "[LinkedList Hard Q6] What internal mechanism guarantees consistency during concurrent structural modification in LinkedList?",
+                        "options":  [
+                                        "A) volatile lock flags",
+                                        "B) modCount verification in iterators",
+                                        "C) Thread.sleep() delays",
+                                        "D) JVM byte-code rewriting"
+                                    ],
+                        "correctOption":  "B",
+                        "explanation":  "LinkedList tracking mechanics use an internal modCount field; iterators compare expectedModCount with modCount to trigger fail-fast behavior."
+                    }
+                ]
+}
