@@ -1,0 +1,17 @@
+{
+  "name": "java-collections-mastery-hub",
+  "version": "1.0.0",
+  "description": "Java Collections & Streams Mastery Full-Stack & Web Engine",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "java",
+    "collections",
+    "streams",
+    "dsa"
+  ],
+  "author": "",
+  "license": "MIT"
+}
